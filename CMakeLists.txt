@@ -9,7 +9,7 @@ find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 
 add_executable(perlin_noise
-    src/test.cpp
+    src/main.cpp
     src/glad.c  
 )
 

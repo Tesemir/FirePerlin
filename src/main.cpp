@@ -146,6 +146,69 @@ public:
         return particles;
     }
 };
+enum class NoiseType {
+    NONE,
+    PERLIN,
+    SIMPLEX
+};
+
+class NoiseGenerator {
+private:
+    NoiseType noiseType;
+    float noiseScale;
+    float time;
+public:
+    NoiseGenerator(NoiseType type = NoiseType::PERLIN, float scale = 1.0f)
+        : noiseType(type), noiseScale(scale), time(0.0f) {}
+
+    void setNoiseType(NoiseType type) { noiseType = type; }
+    void setScale(float scale) { noiseScale = scale; }
+
+    glm::vec3 getNoiseOffset(const glm::vec3& pos, float dt) {
+        time += dt;
+        if (noiseType == NoiseType::NONE) return glm::vec3(0.0f);
+
+        glm::vec3 offset(0.0f);
+        glm::vec3 npos = pos * noiseScale + glm::vec3(0.0f, time * 0.2f, 0.0f);
+
+        switch (noiseType) {
+            case NoiseType::PERLIN:
+                offset.x = glm::perlin(glm::vec2(npos.x, npos.y)) * 0.5f;
+                offset.y = glm::perlin(glm::vec2(npos.y, npos.z)) * 0.5f;
+                offset.z = glm::perlin(glm::vec2(npos.z, npos.x)) * 0.5f;
+                break;
+
+            case NoiseType::SIMPLEX:
+                // Approximation using perlin combination to simulate simplex-like variation
+                offset.x = glm::perlin(glm::vec2(npos.x, npos.y) * 0.5f + glm::vec2(0.3f, 0.7f));
+                offset.y = glm::perlin(glm::vec2(npos.y, npos.z) * 0.5f + glm::vec2(0.9f, 0.1f));
+                offset.z = glm::perlin(glm::vec2(npos.z, npos.x) * 0.5f + glm::vec2(0.5f, 0.5f));
+                break;
+        }
+        return offset;
+    }
+};
+
+class FireSystemWithNoise : public FireSystem {
+private:
+    NoiseGenerator noiseGen;
+public:
+    FireSystemWithNoise(int numParticles, NoiseType noiseType = NoiseType::PERLIN, float scale = 1.0f)
+        : FireSystem(numParticles), noiseGen(noiseType, scale) {}
+
+    void updateWithNoise(float dt) {
+        FireSystem::update(dt);
+
+        auto& parts = const_cast<std::vector<Particle>&>(getParticles());
+        for (auto& p : parts) {
+            glm::vec3 noiseOffset = noiseGen.getNoiseOffset(p.position, dt);
+            p.position += noiseOffset * dt * 10.0f;
+        }
+    }
+
+    void setNoiseType(NoiseType t) { noiseGen.setNoiseType(t); }
+    void setNoiseScale(float s) { noiseGen.setScale(s); }
+};
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     if(firstMouse) {
@@ -271,7 +334,8 @@ int main() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     
-    FireSystem fire(600);
+    // FireSystem fire(600);
+    FireSystemWithNoise fire(600, NoiseType::NONE, 0.8f);
     
     unsigned int VAO, VBO;
     glGenVertexArrays(1, &VAO);
@@ -305,9 +369,12 @@ int main() {
         lastFrame = currentFrame;
         
         processInput(window, deltaTime);
-        fire.update(deltaTime);
+        // fire.update(deltaTime);
+        fire.updateWithNoise(deltaTime);
         
         glClearColor(0.02f, 0.02f, 0.05f, 1.0f);
+        // glClearColor(0.1f, 0.1f, 0.05f, 1.0f);
+        // glClearColor(1.0f, 1.0f, 1.0f, 0.5f);
         glClear(GL_COLOR_BUFFER_BIT);
         
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);

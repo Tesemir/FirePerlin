@@ -171,10 +171,10 @@ public:
                 p.color = glm::vec4(1.0f, 0.6f - mix * 0.2f, 0.0f, 1.0f - mix * 0.2f);
             } else if(t < 0.8f) {
                 float mix = (t - 0.6f) / 0.2f;
-                p.color = glm::vec4(0.9f, 0.3f - mix * 0.3f, 0.0f, 0.8f - mix * 0.3f);
+                p.color = glm::vec4(0.2f, 0.2f, 0.2f, 0.5f - mix * 0.5f);
             } else {
                 float mix = (t - 0.8f) / 0.2f;
-                p.color = glm::vec4(0.6f, 0.0f, 0.0f, 0.5f - mix * 0.5f);
+                p.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.5f - mix * 0.5f);
             }
             
             float sizeLife = t < 0.3f ? t / 0.3f : 1.0f - (t - 0.3f) / 0.7f;
@@ -220,9 +220,9 @@ public:
         switch (noiseType) {
             case NoiseType::PERLIN:
             {
-                offset.x = glm::perlin(glm::vec2(npos.x, npos.y)) * 0.5f;
+                offset.x = glm::perlin(glm::vec2(npos.x, npos.y)) * 0.8f;
                 offset.y = glm::perlin(glm::vec2(npos.y, npos.z)) * 0.5f;
-                offset.z = glm::perlin(glm::vec2(npos.z, npos.x)) * 0.5f;
+                offset.z = glm::perlin(glm::vec2(npos.z, npos.x)) * 0.1f;
                 break;
             }
 
@@ -352,7 +352,7 @@ public:
         auto& parts = const_cast<std::vector<Particle>&>(getParticles());
         for (auto& p : parts) {
             glm::vec3 noiseOffset = noiseGen.getNoiseOffset(p.position, dt);
-            p.position += noiseOffset * dt * 10.0f;
+            p.position += noiseOffset * dt * 1.0f;
         }
     }
 
@@ -586,7 +586,7 @@ int main() {
         fire.updateWithNoise(deltaTime);
         
         glClearColor(0.02f, 0.02f, 0.05f, 1.0f);
-        // glClearColor(0.1f, 0.1f, 0.05f, 1.0f);
+        // glClearColor(0.1f, 0.5f, 0.5f, 1.0f);
         // glClearColor(1.0f, 1.0f, 1.0f, 0.5f);
         glClear(GL_COLOR_BUFFER_BIT);
         

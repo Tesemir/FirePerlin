@@ -15,7 +15,11 @@ set(IMGUI_SRC
         ${CMAKE_SOURCE_DIR}/dependencies/imgui/imgui_widgets.cpp
         ${CMAKE_SOURCE_DIR}/dependencies/imgui/backends/imgui_impl_glfw.cpp
         ${CMAKE_SOURCE_DIR}/dependencies/imgui/backends/imgui_impl_opengl3.cpp
+        ${CMAKE_SOURCE_DIR}/dependencies/imgui/imgui_demo.cpp
 )
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(perlin_noise
     src/main.cpp

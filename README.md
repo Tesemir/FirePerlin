@@ -1,42 +1,25 @@
-🔥 Advanced Fire Simulation with Multi-Noise Turbulence + ImGui (OpenGL / C++)
+# 🔥 Advanced Fire Simulation with Multi-Noise Turbulence + ImGui (OpenGL / C++)
 
 A real-time GPU particle-based fire simulation using OpenGL 3.3, supporting multiple turbulence models (Perlin, Simplex, Value, Gaussian, Pink Noise, Lagrangian advection, Navier-Stokes).
 The project includes an interactive ImGui UI to tweak parameters live: emission rate, turbulence strength, noise scale, method type, etc.
 
 This project uses:
 
-OpenGL 3.3 Core
+* OpenGL 3.3 Core
+* GLFW / GLAD
+* GLM
+* Dear ImGui
+* Custom noise generators
+* A lightweight 2D fluid solver (Navier-Stokes)
 
-GLFW / GLAD
+## ✨ Features
+### 🔥 Fire Particle System
+*Up to thousands of GPU particles
+*Z-sorting for additive blending
+*Dynamic size, rotation & color transitions
+*Two particle types (embers + smoke-like puffs)
 
-GLM
-
-Dear ImGui
-
-Custom noise generators
-
-A lightweight 2D fluid solver (Navier-Stokes)
-
-📸 Preview
-
-(Add your screenshots here)
-
-screenshots/
-    fire_demo_1.png
-    fire_demo_2.png
-
-✨ Features
-🔥 Fire Particle System
-
-Up to thousands of GPU particles
-
-Z-sorting for additive blending
-
-Dynamic size, rotation & color transitions
-
-Two particle types (embers + smoke-like puffs)
-
-🌪 Turbulence Methods
+### 🌪 Turbulence Methods
 
 Selectable via ImGui:
 
@@ -49,33 +32,26 @@ Gaussian Noise	Random normal disturbution
 Pink Noise (1/f)	Smooth low-frequency turbulence
 Lagrangian	Curl-based semi-fluid velocity sampling
 Navier-Stokes	Real 2D fluid solver used as a velocity field
-📐 3D Grid
+### 📐 3D Grid
 
-Rendered under the fire for spatial reference
+* Rendered under the fire for spatial reference
+* Optional color highlight near fire position
 
-Optional color highlight near fire position
+### 🖥 ImGui Control Panel
 
-🖥 ImGui Control Panel
+* Switch turbulence model
 
-Switch turbulence model
+* Adjust:
+  * Noise scale
+  * Turbulence strength
+  * Emission rate
+  * Pause / Resume
+  * Reset Fluid solver
+* FPS counter window
+* Optional ImGui demo window
 
-Adjust:
-
-Noise scale
-
-Turbulence strength
-
-Emission rate
-
-Pause / Resume
-
-Reset Fluid solver
-
-FPS counter window
-
-Optional ImGui demo window
-
-📦 Project Structure
+## 📦 Project Structure
+```arduino
 project/
 │
 ├── src/
@@ -93,9 +69,10 @@ project/
 ├── CMakeLists.txt
 ├── config.h
 └── README.md
+```
 
-🔧 Build Instructions (CMake)
-Requirements
+## 🔧 Build Instructions (CMake)
+### Requirements
 Dependency	Version
 CMake	3.26+
 OpenGL	3.3 Core
@@ -103,20 +80,27 @@ GLFW	3.x
 GLAD	Core Loader
 GLM	0.9.9+
 ImGui	Latest
-Clone
+
+### Clone
+```bash
 git clone https://github.com/yourname/fire-simulation.git
 cd fire-simulation
+```
 
-Build
+### Build
+```bash
 mkdir build
 cd build
 cmake ..
 cmake --build .
+```
 
-Run
+### Run
+```bash
 ./perlin_noise
+```
 
-🎮 Controls
+## 🎮 Controls
 Action	Key
 Move forward	W
 Move backward	S
@@ -126,49 +110,55 @@ Move up	Space
 Move down	Left Shift
 Mouse Look	Move mouse
 Exit	ESC
-🛠 How the System Works
-Particle Buffers
+
+## 🛠 How the System Works
+### Particle Buffers
 
 Particles stored in a single VBO:
-
+```scss
 position (vec3)
 color    (vec4)
 size     (float)
 rotation (float)
+```
 
 
 Uploaded each frame via:
-
+```cpp
 glBufferSubData(GL_ARRAY_BUFFER, 0, particles.size() * sizeof(Particle), particles.data());
+```
 
 Turbulence Sampling
 
 Selectable via enum:
-
+```cpp
 enum class TurbulenceMethod {
     None, Perlin, Simplex, Value, Gaussian, Pink, Lagrangian, NavierStokes
 };
+```
 
 
 Each turbulence model returns a 3D vector force:
-
+```cpp
 glm::vec3 turb = sampleTurbulenceVec(p.position, time);
 p.velocity += turb * dt;
+```
 
 Navier-Stokes Integration
 
 When active, the 2D fluid grid is updated every frame:
-
+```cpp
 globalFluid.addDensity(...)
 globalFluid.addVelocity(...)
 globalFluid.step();
-
+```
 
 Then sampled as:
-
+```cpp
 glm::vec2 v = globalFluid.sampleVelocity(pos.x, pos.z, 30.0f);
+```
 
-🧪 ImGui Panel
+## 🧪 ImGui Panel
 
 Your UI panel includes:
 
@@ -187,8 +177,12 @@ Reset fluid solver button
 Debug windows
 
 Code:
-
+```cpp
 ImGui::Combo("Method", &cur, methods, IM_ARRAYSIZE(methods));
 ImGui::SliderFloat("Noise scale", &noiseScale, 0.01f, 2.0f);
 ImGui::SliderFloat("Turbulence strength", &turbStrength, 0.0f, 8.0f);
 ImGui::SliderFloat("Emission rate", &emission, 0.0f, 2000.0f);
+```
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)

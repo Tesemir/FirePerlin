@@ -2,26 +2,8 @@
 // Combined/extended fire effect with multiple noise methods + ImGui UI
 // Requires: GLAD, GLFW, GLM, ImGui (and ImGui backends for GLFW+OpenGL3)
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "config.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
-
-#include <iostream>
-#include <vector>
-#include <cmath>
-#include <random>
-#include <algorithm>
-#include <chrono>
-#include <cstring>
-
-// ------------------------ Existing Perlin implementation (unchanged) ------------------------
 class PerlinNoise {
 private:
     std::vector<int> p;
@@ -285,9 +267,8 @@ struct Particle {
     int type;
 };
 
-// Vertex/fragment shaders (same as yours — kept minimal)
+// Vertex/fragment shaders
 const char* particleVertexShader = R"(
-// ... same as your original vertex shader ...
 #version 330 core
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec4 aColor;
@@ -309,7 +290,6 @@ void main() {
 )";
 
 const char* particleFragmentShader = R"(
-// ... same as your original fragment shader ...
 #version 330 core
 in vec4 vColor;
 in float vRotation;
@@ -374,7 +354,7 @@ enum class TurbulenceMethod {
     NavierStokes // sample from fluid grid
 };
 
-// ------------------------ FireEffect class (extended) ------------------------
+// ------------------------ FireEffect class ------------------------
 class FireEffect {
 private:
     std::vector<Particle> particles;
@@ -706,6 +686,14 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     camera.processMouseMovement(xoffset, yoffset);
 }
 
+int windowWidth = 1400, windowHeight = 900;
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    windowWidth = width;
+    windowHeight = height;
+    glViewport(0, 0, width, height);
+}
+
 // ------------------------ Main program ------------------------
 int main() {
     if (!glfwInit()) { std::cout<<"GLFW init failed\n"; return -1; }
@@ -717,6 +705,7 @@ int main() {
     glfwMakeContextCurrent(window); glfwSwapInterval(1);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) { std::cout<<"GLAD init failed\n"; return -1; }
     glEnable(GL_DEPTH_TEST); glEnable(GL_PROGRAM_POINT_SIZE); glEnable(GL_MULTISAMPLE);
